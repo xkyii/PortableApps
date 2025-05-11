@@ -18,3 +18,8 @@ Windows portable apps for personal use.
 cmd /c .\PortableApps.comLauncherGenerator.exe E:\xk\Code\xkyii\PortableApps\Apps\RapidEE
 cmd /c .\PortableApps.comInstaller.exe E:\xk\Code\xkyii\PortableApps\Apps\RapidEE
 ```
+
+### 计算SHA256
+```cmd
+certutil -hashfile filename SHA256
+```
