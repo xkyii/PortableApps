@@ -23,3 +23,8 @@ cmd /c .\PortableApps.comInstaller.exe E:\xk\Code\xkyii\PortableApps\Apps\RapidE
 ```cmd
 certutil -hashfile filename SHA256
 ```
+
+## 多启动器
+- [Using the launcher generator to generate multiple app launchers](https://portableapps.com/node/65720)
+
+这里提到, `PA.c Launcher`只支持单`Launcher`, 只有`LibreOffice`和`OpenOffice`是例外.
