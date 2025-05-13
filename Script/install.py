@@ -2,92 +2,81 @@ import subprocess
 import os
 import configparser
 
-APPS_DIR = 'D:\\Code\\xkyii\\PortableApps\\Apps\\'
+APPS_DIR = 'E:\\xk\\Code\\xkyii\\PortableApps\\Apps\\'
 PAF_DIR = 'D:\\Soft\\PortableApps\\'
 LAUNCHER_EXE = PAF_DIR + 'PortableApps.comLauncher\\PortableApps.comLauncherGenerator.exe'
 INSTALLER_EXE = PAF_DIR + 'PortableApps.comInstaller\\PortableApps.comInstaller.exe'
 
-
-def create_launcher_of(app_name):
-    cmd = LAUNCHER_EXE + " " + APPS_DIR + app_name
-    print(cmd)
-    subprocess.run(cmd, shell=True)
+class IniParser(configparser.ConfigParser):
+    def optionxform(self, option_str):
+        return option_str
 
 
-def create_installer_of(app_name):
+def create_installer_cmd(app_name):
     cmd = INSTALLER_EXE + " " + APPS_DIR + app_name
     print(cmd)
     subprocess.run(cmd, shell=True)
 
 
-def read_ini(app_name, ini_file):
-    ini_file_path = os.path.join(APPS_DIR, app_name, 'App', 'AppInfo', ini_file)
-
-    # 检查文件是否存在
-    if not os.path.exists(ini_file_path):
-        print(f"Error: The file {ini_file_path} does not exist.")
-        return None
-
-    # 创建ConfigParser对象
-    config = configparser.ConfigParser()
-
-    # 读取ini文件
-    config.read(ini_file_path)
-
-    # 将配置项存储到字典中
-    config_dict = {}
-    for section in config.sections():
-        config_dict[section] = {}
-        for key, value in config.items(section):
-            config_dict[section][key] = value
-
-    return config_dict
+def create_installer_of(app_name):
+    create_installer_cmd(app_name)
 
 
-def write_ini(app_name, ini_file, config_dict):
-    # 构造appinfo.ini文件的完整路径
-    ini_file_path = os.path.join(APPS_DIR, app_name, 'App', 'AppInfo', ini_file)
-
-    # 创建ConfigParser对象
-    config = configparser.ConfigParser()
-
-    # 将字典中的配置项写入ConfigParser对象
-    for section, items in config_dict.items():
-        config[section] = items
-
-    # 写回appinfo.ini文件
-    with open(ini_file_path, 'w') as configfile:
-        config.write(configfile)
+def create_launcher_cmd(app_name):
+    cmd = LAUNCHER_EXE + " " + APPS_DIR + app_name
+    print(cmd)
+    subprocess.run(cmd, shell=True)
 
 
-def rewrite(app_name, i):
+def create_launcher_of(app_name, n=1):
+    if n == 1:
+        create_launcher_cmd(app_name)
+        return
+
     f = os.path.join(APPS_DIR, app_name, 'App', 'AppInfo', 'appinfo.ini')
 
     # 检查文件是否存在
     if not os.path.exists(f):
         print(f"Error: The file {f} does not exist.")
-        return None
+        return
 
-    # 创建ConfigParser对象
-    config = configparser.ConfigParser()
+    # 创建[IniParser]对象
+    config = IniParser()
 
-    # 读取ini文件
+    # 读取读取appinfo.ini文件
     config.read(f)
 
-    # 检查appinfo.ini文件是否存在
-    fn = os.path.join(APPS_DIR, app_name, 'App', 'AppInfo', 'appinfo' + i + '.ini')
-    if os.path.exists(fn):
-        # 读取appinfo1.ini文件
-        config.read(fn)
+    # 备份原文件
+    os.replace(f, f + '.bak')
 
-    # 将配置项存储到字典中
-    config_dict = {}
-    for section in config.sections():
-        config_dict[section] = {}
-        for key, value in config.items(section):
-            config_dict[section][key] = value
+    for i in range(1, n+1):
+        # 检查appinfo.ini文件是否存在
+        fi = os.path.join(APPS_DIR, app_name, 'App', 'AppInfo', 'appinfo' + str(i) + '.ini')
+        print(fi)
+        if not os.path.exists(fi):
+            # print(fi + ' not exist.')
+            break
 
-    return config_dict
+        c = IniParser()
+        # 复制config
+        for section in config.sections():
+            if section not in c:
+                c.add_section(section)
+            for key, value in config.items(section):
+                c.set(section, key, value)
+
+        # 读取appinfox.ini文件 (覆盖部分配置)
+        c.read(fi)
+
+        # 写回appinfo.ini文件
+        with open(f, 'w') as cf:
+            c.write(cf)
+
+        print(f'create_launcher_of: {c['Details']['AppId']}')
+        create_launcher_of(app_name)
+
+    # 恢复文件
+    os.replace(f + '.bak', f)
 
 
 if __name__ == '__main__':
@@ -95,14 +84,13 @@ if __name__ == '__main__':
         # 'RapidEE',
         # 'PixPin',
         # 'TotalCommander',
-        'XShellPlus',
+        ['XShellPlus', 2],
     ]
 
-    appinfo_ini = "appinfo.ini"
-
     for app in apps:
-        # create_launcher_of(app)
-        # create_installer_of(app)
-        for i in range(1, 10):
-            c = read_ini(app, i)
-            print(c)
+        if isinstance(app, str):
+            create_launcher_of(app)
+            create_installer_of(app)
+        elif isinstance(app, list):
+            create_launcher_of(app[0], app[1])
+            create_installer_of(app[0])
