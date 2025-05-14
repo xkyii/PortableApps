@@ -2,7 +2,7 @@ import subprocess
 import os
 import configparser
 
-APPS_DIR = 'E:\\xk\\Code\\xkyii\\PortableApps\\Apps\\'
+APPS_DIR = 'D:\\Code\\xkyii\\PortableApps\\Apps\\'
 PAF_DIR = 'D:\\Soft\\PortableApps\\'
 LAUNCHER_EXE = PAF_DIR + 'PortableApps.comLauncher\\PortableApps.comLauncherGenerator.exe'
 INSTALLER_EXE = PAF_DIR + 'PortableApps.comInstaller\\PortableApps.comInstaller.exe'
@@ -84,7 +84,8 @@ if __name__ == '__main__':
         # 'RapidEE',
         # 'PixPin',
         # 'TotalCommander',
-        ['XShellPlus', 2],
+        # ['XShellPlus', 2],
+        'FreeFileSync',
     ]
 
     for app in apps:
