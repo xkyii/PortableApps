@@ -85,7 +85,8 @@ if __name__ == '__main__':
         # 'PixPin',
         # 'TotalCommander',
         # ['XShellPlus', 2],
-        'FreeFileSync',
+        # 'FreeFileSync',
+        'LinqPad',
     ]
 
     for app in apps:
