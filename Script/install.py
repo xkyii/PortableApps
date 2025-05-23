@@ -86,7 +86,8 @@ if __name__ == '__main__':
         # 'TotalCommander',
         # ['XShellPlus', 2],
         # 'FreeFileSync',
-        'LinqPad',
+        # 'LinqPad',
+        'FsCapture',
     ]
 
     for app in apps:
