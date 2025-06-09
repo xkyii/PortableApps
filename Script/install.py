@@ -3,7 +3,7 @@ import os
 import configparser
 
 APPS_DIR = 'D:\\Code\\xkyii\\PortableApps\\Apps\\'
-PAF_DIR = 'D:\\Soft\\PortableApps\\'
+PAF_DIR = 'D:\\Other\\Soft\\PortableApps\\'
 LAUNCHER_EXE = PAF_DIR + 'PortableApps.comLauncher\\PortableApps.comLauncherGenerator.exe'
 INSTALLER_EXE = PAF_DIR + 'PortableApps.comInstaller\\PortableApps.comInstaller.exe'
 
@@ -87,7 +87,8 @@ if __name__ == '__main__':
         # ['XShellPlus', 2],
         # 'FreeFileSync',
         # 'LinqPad',
-        'FsCapture',
+        # 'FsCapture',
+        'XYplorer',
     ]
 
     for app in apps:

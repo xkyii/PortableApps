@@ -10,6 +10,14 @@ Windows portable apps for personal use.
 ### 目录结构
 
 - Apps
+    - FreeFileSync     14.3.0.0
+    - FsCapture        11.0.0.0
+    - LinqPad          8.9.9.0
+    - PixPin           2.0.0.3
+    - RapidEE          3.9.0.0
+    - TotalCommander   11.51.0.0
+    - XShellPlus       8.0.0.9
+
 - Template
     - [Template_3.9.0](https://downloads.sourceforge.net/portableapps/PortableApps.com_Application_Template_3.9.0.zip)
 
