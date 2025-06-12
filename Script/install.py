@@ -88,7 +88,8 @@ if __name__ == '__main__':
         # 'FreeFileSync',
         # 'LinqPad',
         # 'FsCapture',
-        'XYplorer',
+        # 'XYplorer',
+        'Thunder',
     ]
 
     for app in apps:
