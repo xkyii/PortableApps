@@ -8,6 +8,7 @@
   - 运行 `install.py` 必须设 `PORTABLEAPPS_PAF_DIR` 指向该目录，且**要用 Windows 风格路径**（如 `D:/Soft/PortableApps`），不能传 Git Bash 的 `/d/Soft/...`——pathlib 在 Windows 上会把 `/d/...` 误解析成 `D:\d\...`。
   - 已实测：`install.py RapidEE` 在该路径下构建成功，产出 `Apps/RapidEE/RapidEEPortable.exe` 与根目录 `RapidEEPortable_3.9.0.paf.exe`（均已被 .gitignore 忽略）。
 - **构建入口**：`Script/install.py` 已重构——去机器硬编码路径（用环境变量 `PORTABLEAPPS_APPS_DIR`/`PORTABLEAPPS_PAF_DIR`），支持 `--list`/`--all`/指定 app 名，多启动器自动探测（`appinfo{i}.ini` 数量）。
+- **启动闪屏已全局关闭（2026-08）**：所有 launcher 源 ini 的 `[Launch]` 段已加 `ShowSplashScreen=false` 并重编译 launcher；Platform 层 `DisableSplashScreen` 模板（`Template/Other/Source/AppNamePortable.ini` 与 `Apps/XShellPlus/Other/Source/AppNamePortable.ini`）已统一为 `true`，防重打包被覆盖回弹窗。**改 launcher 源 ini 后必须重编译 launcher（`install.py <app>`）才生效**。
 
 ## 从 Scoop app 打包成 PortableApp 的实践坑（可复用）
 - **环境限制（重要）**：Git Bash **无法直接 exec 工作区内的 `.exe`**（报 `Permission denied`，连 `D:\Soft` 下也拒绝）——工作区疑似挂载 noexec。但 **Python `subprocess`（走 Windows `CreateProcess`）可正常执行任何 exe**。所以凡要在仓库目录里跑 exe（如某 app 的 patcher/安装器），用 `python -c "subprocess.run([...])"` 启动，别用 `./xxx.exe` 或 `cmd /c`。
