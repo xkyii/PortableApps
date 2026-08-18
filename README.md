@@ -15,17 +15,19 @@ Windows portable apps for personal use.
     - LinqPad          8.9.9.0
     - PixPin           2.0.0.3
     - RapidEE          3.9.0.0
+    - Thunder          12.3.0.3340
     - TotalCommander   11.51.0.0
     - XShellPlus       8.0.0.9
+    - XYplorer         27.00.600.0
 
 - Template
-    - [Template_3.9.0](https://downloads.sourceforge.net/portableapps/PortableApps.com_Application_Template_3.9.0.zip)
+    - [Template_3.9.2](https://downloads.sourceforge.net/portableapps/PortableApps.com_Application_Template_3.9.2.zip)
 
 
 ### 命令行
 ```cmd
-cmd /c .\PortableApps.comLauncherGenerator.exe E:\xk\Code\xkyii\PortableApps\Apps\RapidEE
-cmd /c .\PortableApps.comInstaller.exe E:\xk\Code\xkyii\PortableApps\Apps\RapidEE
+cmd /c .\PortableApps.comLauncherGenerator.exe D:\Code\xkyii\PortableApps\Apps\RapidEE
+cmd /c .\PortableApps.comInstaller.exe D:\Code\xkyii\PortableApps\Apps\RapidEE
 ```
 
 ### 计算SHA256
