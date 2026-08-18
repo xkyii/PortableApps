@@ -1,1 +1,6 @@
 ﻿Apps/**/App/AppFile
+
+# 构建产物（install.py 生成，非源码，不入库）
+Apps/**/*Portable.exe
+*.paf.exe
+Apps/**/App/Readme.txt
