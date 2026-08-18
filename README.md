@@ -24,11 +24,28 @@ Windows portable apps for personal use.
     - [Template_3.9.2](https://downloads.sourceforge.net/portableapps/PortableApps.com_Application_Template_3.9.2.zip)
 
 
-### 命令行
+### 构建
+
+构建工具（PortableApps.com Launcher Generator / Installer）在本机 `D:\Soft\PortableApps`
+（非仓库内容，需自行安装）。通过 `Script/install.py` 封装调用：
+
 ```cmd
-cmd /c .\PortableApps.comLauncherGenerator.exe D:\Code\xkyii\PortableApps\Apps\RapidEE
-cmd /c .\PortableApps.comInstaller.exe D:\Code\xkyii\PortableApps\Apps\RapidEE
+REM 设置工具目录（必须用 Windows 风格路径，不要写 /d/... 否则会被误解析成 D:\d\...）
+set PORTABLEAPPS_PAF_DIR=D:\Soft\PortableApps
+
+REM 列出所有 app 及其启动器数量
+python Script/install.py --list
+
+REM 构建单个 app（先生成启动器，再生成安装包）
+python Script/install.py RapidEE
+
+REM 构建多个 / 全部
+python Script/install.py Thunder XYplorer
+python Script/install.py --all
 ```
+
+> 构建前需先把原始软件放到 `Apps\<AppName>\App\AppFile\`（不入 git）。
+> 生成的 `*Portable.exe` 与 `*.paf.exe` 已被 `.gitignore` 忽略，不会提交进仓库。
 
 ### 计算SHA256
 ```cmd
