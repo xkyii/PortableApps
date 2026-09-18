@@ -1,4 +1,6 @@
 ﻿Apps/**/App/AppFile
+# 双架构 app 的第二个二进制目录（如 BeyondCompare 的 32 位构建）
+Apps/**/App/AppFile32
 
 # 构建产物（install.py 生成，非源码，不入库）
 Apps/**/*Portable.exe

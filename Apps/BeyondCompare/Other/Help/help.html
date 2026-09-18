@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<title>Beyond Compare Portable Help</title>
+</head>
+<body>
+<h1>Beyond Compare Portable Help</h1>
+
+<p><img src="..\..\App\AppInfo\appicon_128.png" width="128" height="128" style="float:right;">Beyond Compare Portable is a file and folder compare, merge and synchronize tool, packaged with a PortableApps.com launcher so you can carry it on a USB drive or cloud folder and run it on any Windows PC without installing.</p>
+
+<p>Homepage: <a href="https://www.scootersoftware.com/">Scooter Software</a></p>
+
+<p>This is a personal portable package. Beyond Compare is proprietary software; make sure you have a valid licence for the machines you use it on.</p>
+
+<h2>Portable Notes</h2>
+<ul>
+<li>Both the <b>64-bit</b> and <b>32-bit</b> builds are included (<b>App\AppFile</b> and <b>App\AppFile32</b>). The launcher picks the right one for the host OS automatically.</li>
+<li><b>Registration travels with the app.</b> Beyond Compare reads <b>BC5Key.txt</b> from the folder that holds BCompare.exe, so the key file inside App\AppFile is picked up automatically &mdash; no re-registration on a new machine.</li>
+<li>Your settings (the <b>%APPDATA%\Scooter Software</b> directory and the <b>HKCU\Software\Scooter Software</b> registry branch) are stored under <b>Data\</b> and travel with the app. On first run, configure Beyond Compare to your liking, then exit normally so the launcher writes everything back into Data\.</li>
+<li>Explorer shell integration (right-click compare menu, BCShellEx) is machine-level and is <b>not</b> portable &mdash; it is not registered by this package, which keeps launching UAC-free. Beyond Compare itself runs fine without it.</li>
+<li>Do <b>not</b> use Beyond Compare's built-in updater &mdash; it would install a per-machine copy. To upgrade, replace the files in <b>App\AppFile</b> (and App\AppFile32) with the new build and update <b>App\AppInfo\appinfo.ini</b>.</li>
+</ul>
+
+<h2>Portable App Issues</h2>
+<ul>
+<li><a href="https://portableapps.com/support/portable_app#using">Using a Portable App</a></li>
+<li><a href="https://portableapps.com/support/portable_app#upgrading">Upgrading a Portable App</a></li>
+</ul>
+</body>
+</html>
