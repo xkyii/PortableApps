@@ -23,8 +23,10 @@
 import argparse
 import configparser
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # --- 路径解析（去硬编码）---
@@ -69,7 +71,36 @@ def run(cmd):
 
 
 def create_launcher(app_name):
-    run(f'"{LAUNCHER_EXE}" "{APPS_DIR / app_name}"')
+    """编译启动器。
+
+    坑（2026-09 实测）：PortableApps.com Launcher Generator 2.2.9 只有在
+    **app 目录位于 %TEMP% 之下**时才能读到 appinfo.ini。传任何其它绝对路径
+    （工作区内、D:\\Temp、C:\\PA_Test …）都会失败，日志只留一句误导性的
+    "ERROR: [Details]:Name [Details]:AppID or [Version]:PackageVersion not
+    found in appinfo.ini files"，且不产出 exe。
+
+    所以这里先把 App\\AppInfo 暂存到 %TEMP% 再编译，最后把生成的
+    *Portable.exe 拷回真实 app 目录。生成启动器只需要 App\\AppInfo
+    （appinfo.ini / appicon.ico / Launcher\\*.ini），不需要 AppFile 里的二进制。
+    """
+    src = APPS_DIR / app_name
+    stage = Path(tempfile.gettempdir()) / 'PortableAppsLauncherBuild' / app_name
+    if stage.exists():
+        shutil.rmtree(stage)
+    (stage / 'App').mkdir(parents=True)
+    shutil.copytree(src / 'App' / 'AppInfo', stage / 'App' / 'AppInfo')
+
+    run(f'"{LAUNCHER_EXE}" "{stage}"')
+
+    produced = sorted(p for p in stage.glob('*.exe'))
+    if not produced:
+        print(f"  [警告] {app_name}: 启动器未生成，检查 "
+              f"{LAUNCHER_EXE.parent / 'Data' / 'PortableApps.comLauncherGeneratorLog.txt'}")
+        return
+    for p in produced:
+        shutil.copy2(p, src / p.name)
+        print(f"  -> {src / p.name}")
+    shutil.rmtree(stage, ignore_errors=True)
 
 
 def create_installer(app_name):
