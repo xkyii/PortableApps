@@ -4,6 +4,8 @@
 - **用途（重要）**：用户实际使用 **PortableApps.com Platform** 作为启动菜单。因此全仓库采用 PA.c 格式的核心目的是让所有 app 统一出现在 Platform 菜单、统一处理 splash。即便 RapidEE 这类单文件免安装 exe，包装成 PA.c 也有意义（菜单一致性），**不要为了"它本来就能便携"而建议去掉 PA.c 包装**。
 - **入库策略（重要）**：仓库只存配置/元数据/模板；各 app 的**真实二进制程序不入库**。`.gitignore` 忽略 `Apps/**/App/AppFile` **和 `Apps/**/App/AppFile32`**（后者供双架构 app，2026-09 新增）。用户自行把程序下载到本地 `Apps/*/App/AppFile` 目录后参与构建，但不提交。
   - 因此**不为 installer.ini 填下载源**（任务④已取消）：换机器靠用户本地放置二进制，而非在线下载重建。
+  - **git 卫生（2026-09-18 踩坑）**：`.gitignore` 只对**未跟踪**文件生效，**已跟踪文件不会被新增规则自动忽略**。所以每次新增忽略规则后，必须回头检查是否已有文件"漏网"在库里：`git ls-files . | grep -iE "AppFile|Portable\.exe|\.paf\.exe"`。实测抓到 `Apps/XYplorer/XYplorerPortable.exe`（PAL 启动器，185,768 bytes）自 `22180de` 起就误入库，已用 `git rm --cached` 移出（保留本地文件）并提交 `344afd8`。
+    - 注意 `Template/AppNamePortable.exe` 是**有意保留**的模板示例（`Template/` 不在 `Apps/**` 规则范围内），别当成漏网误删。
 - **格式/工具版本基线（2026-08）**：Format 3.9；Application Template 已升 3.9.2；外部构建工具（PortableApps.com Installer / Launcher Generator）在用户本机 `D:\Soft\PortableApps`（注意：不是 `D:\Other\Soft\...`，曾记错），非仓库内容，需用户手动更新（官方现为 Installer 3.9.18 / Launcher 2.2.9）。
   - 运行 `install.py` 必须设 `PORTABLEAPPS_PAF_DIR` 指向该目录，且**要用 Windows 风格路径**（如 `D:/Soft/PortableApps`），不能传 Git Bash 的 `/d/Soft/...`——pathlib 在 Windows 上会把 `/d/...` 误解析成 `D:\d\...`。
   - 已实测：`install.py RapidEE` 在该路径下构建成功，产出 `Apps/RapidEE/RapidEEPortable.exe` 与 **`Apps/RapidEEPortable_3.9.0.paf.exe`**（注意 paf.exe 落在 `Apps/` 目录下，是 PA.c Installer 默认输出到 app 目录父级的行为，非仓库根目录）。两者均被 .gitignore 忽略。
@@ -15,7 +17,7 @@
   - Platform 层"启动中"窗口另由根 ini 平铺 `DisableSplashScreen=true` 控制（RapidEE/LinqPad/DOpus/FlyingBird/XShell/XFtp 等已设），与 PAL 自带 splash 是两回事。
 - **环境异常（重要，2026-08-19 踩坑）**：在本会话操作 `Apps/` 时，曾反复出现 **整个 `Apps/` 树被外部进程删空**（129 文件）且 **`.git/index.lock` 持续被重建** 的现象，导致 `git checkout`/`git rm` 频繁报锁或"文件消失"。排查：tasklist 无 FlyingBird/安装器/git.exe 进程；常驻有 Defender(`MsMpEng`) 与 Sandboxie(`SbieSvc`)，且 Bash 工具平时跑在沙箱内（某次提示 "Sandbox bypassed escalation-approved"）。**应对**：遇 `index.lock` 报错先 `rm -f .git/index.lock`；用 `rm` + 仅 `git add` 特定路径（而非 `git rm -A`）避免误提交被删的其它文件；数据始终安全（全在 git HEAD），删空后 `git checkout HEAD -- Apps/` 可无损恢复。根因疑为沙箱/IDE 后台 git 轮询，未完全定位，若再现需查 Sandboxie/IDE git 设置。
 
-## 构建工具的两个致命坑（2026-09-18 定位，均已写回 skill）
+## 构建工具的致命坑（2026-09-18 定位，均已写回 skill）
 
 ### 坑 1：所有 .ini 必须 CRLF 换行
 PA.c 工具用 Win32 `GetPrivateProfileString` 解析 ini，**LF-only 会被当成一整行**，
