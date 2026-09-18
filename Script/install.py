@@ -9,6 +9,8 @@
     python install.py Thunder               构建单个 app（先 launcher 后 installer）
     python install.py Thunder XYplorer      构建多个 app
     python install.py --all                 构建全部 app
+    python install.py --rename-paf          仅把已存在的 *.paf.exe 改为短名，不构建
+    python install.py --all --keep-portable 保留 Installer 原生命名
 
 多启动器:
     若某 app 的 App/AppInfo 下存在 appinfo1.ini、appinfo2.ini ...，
@@ -43,6 +45,67 @@ INSTALLER_EXE = PAF_DIR / 'PortableApps.comInstaller' / 'PortableApps.comInstall
 class IniParser(configparser.ConfigParser):
     def optionxform(self, option_str):
         return option_str
+
+
+# --- paf 安装包命名策略 ---
+# Installer 把安装包名硬编码为 "<AppID>_<DisplayVersion>"（再加可选后缀），
+# 见 InstallerWizard.nsi:744-782，没有任何配置项能覆盖。
+# 但 AppID 在 PA.c 里必须是 <Name>Portable 形式 —— 它还同时决定 launcher
+# 文件名、Data\settings\<AppID>Settings.ini、Platform 的应用标识与注册表键，
+# 不能为了改名去动它。所以文件名里那个 "Portable" 是冗余的：
+# ".paf.exe" 后缀本身已表明这是 Portable 安装包。
+# 故构建完成后，把 AppID 结尾的 Portable 从文件名里去掉。
+#
+# 安全性：生成物只在 installer.ini 设了 [DownloadFiles] DownloadURL 时才会在
+# 运行时自检"文件名必须以 _online.paf.exe 结尾"，见
+# PortableApps.comInstaller.nsi:440-455（整段被 !ifdef DownloadURL 条件编译包裹）。
+# 本仓库不填下载源，因此改名对安装包的运行没有任何影响。
+# 需要 Installer 原生名字时传 --keep-portable。
+KEEP_PORTABLE_NAME = False
+PORTABLE_SUFFIX = 'Portable'
+
+
+def read_appid(app_name):
+    """读 appinfo.ini 的 [Details] AppId（键名大小写不敏感，兼容 AppID/AppId）。"""
+    f = APPS_DIR / app_name / 'App' / 'AppInfo' / 'appinfo.ini'
+    if not f.is_file():
+        return None
+    c = configparser.ConfigParser(interpolation=None)
+    c.optionxform = str
+    try:
+        c.read(f, encoding='utf-8')
+    except configparser.Error:
+        return None
+    if 'Details' not in c:
+        return None
+    for key, value in c['Details'].items():
+        if key.lower() == 'appid':
+            return value.strip()
+    return None
+
+
+def rename_paf(app_name):
+    """把 <AppID>_<ver>.paf.exe 中的 AppID 去掉结尾的 Portable。返回改名个数。
+
+    幂等：目标名已存在时直接覆盖（重建场景下旧文件会残留，正好清掉）。
+    """
+    appid = read_appid(app_name)
+    if not appid:
+        print(f"  [警告] {app_name}: 读不到 AppId，跳过重命名")
+        return 0
+    if not appid.endswith(PORTABLE_SUFFIX) or appid == PORTABLE_SUFFIX:
+        return 0  # AppID 本就不带 Portable 结尾，无需处理
+
+    short = appid[:-len(PORTABLE_SUFFIX)]
+    renamed = 0
+    for src in sorted(APPS_DIR.glob(f'{appid}_*.paf.exe')):
+        dst = APPS_DIR / (short + src.name[len(appid):])
+        if dst.exists():
+            dst.unlink()
+        os.replace(src, dst)
+        print(f"  -> 重命名 {src.name}  =>  {dst.name}")
+        renamed += 1
+    return renamed
 
 
 def list_apps():
@@ -105,6 +168,8 @@ def create_launcher(app_name):
 
 def create_installer(app_name):
     run(f'"{INSTALLER_EXE}" "{APPS_DIR / app_name}"')
+    if not KEEP_PORTABLE_NAME:
+        rename_paf(app_name)
 
 
 def build_multi_launcher(app_name, n):
@@ -164,6 +229,7 @@ def check_tools():
 
 
 def main():
+    global KEEP_PORTABLE_NAME
     parser = argparse.ArgumentParser(
         description='PortableApps.com 构建辅助脚本',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -171,7 +237,13 @@ def main():
     parser.add_argument('apps', nargs='*', help='要构建的 app 名（可多个）')
     parser.add_argument('--list', action='store_true', help='列出所有可用 app')
     parser.add_argument('--all', action='store_true', help='构建全部 app')
+    parser.add_argument('--rename-paf', action='store_true',
+                        help='仅重命名已存在的 *.paf.exe（去掉 AppID 结尾的 Portable），不构建')
+    parser.add_argument('--keep-portable', action='store_true',
+                        help='保留 Installer 的原生命名（<AppID>_<ver>.paf.exe）')
     args = parser.parse_args()
+
+    KEEP_PORTABLE_NAME = args.keep_portable
 
     if args.list:
         apps = list_apps()
@@ -180,6 +252,14 @@ def main():
             n = detect_launcher_count(a)
             mark = f" (x{n} 启动器)" if n > 1 else ""
             print(f"  - {a}{mark}")
+        return
+
+    if args.rename_paf:
+        if args.keep_portable:
+            print("--rename-paf 与 --keep-portable 矛盾：前者就是执行改名。")
+            return
+        total = sum(rename_paf(a) for a in list_apps())
+        print(f"共重命名 {total} 个 paf。")
         return
 
     if args.all:
