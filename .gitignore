@@ -6,3 +6,7 @@ Apps/**/App/AppFile32
 Apps/**/*Portable.exe
 *.paf.exe
 Apps/**/App/Readme.txt
+
+# Python 字节码缓存（py_compile / 运行 install.py 产生）
+__pycache__/
+*.pyc
